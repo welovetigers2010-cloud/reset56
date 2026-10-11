@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Reset 56 · 八周重置</title>
+<style>
+:root{
+  --paper:#FDFDFB; --ink:#141414; --line:#E9E6E0; --dim:#9B968E;
+  --coral:#E8918F; --coral-soft:#FBEFEE; --coral-line:#F2D5D3;
+  --blue:#7FA9C4; --blue-soft:#EFF5F8; --blue-line:#D3E2EC;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);
+  background-image:radial-gradient(circle, #E6E3DD 1.1px, transparent 1.1px);
+  background-size:24px 24px; color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Segoe UI","Microsoft YaHei",sans-serif;
+  max-width:640px; margin:0 auto; padding:0 22px calc(40px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased;
+}
+/* ---------- header ---------- */
+header{padding:52px 0 0}
+.kicker{font:italic 400 13px/1 Georgia,serif; color:var(--coral); letter-spacing:.14em; text-transform:uppercase}
+h1{font-size:44px; line-height:1.05; letter-spacing:-.01em; margin:10px 0 6px; font-weight:800}
+h1 .num{font-family:Georgia,serif; font-style:italic; font-weight:400}
+.sub{font-size:13.5px; color:var(--dim); line-height:1.7}
+.sub b{color:var(--ink); font-weight:600}
+/* ---------- stat ---------- */
+.stat{display:flex; align-items:flex-end; gap:18px; margin:30px 0 8px}
+.stat .big{font:400 64px/0.9 Georgia,serif; letter-spacing:-.02em}
+.stat .big .done{color:var(--coral)}
+.stat .of{font:italic 400 20px Georgia,serif; color:var(--dim)}
+.stat .pct{margin-left:auto; text-align:right; padding-bottom:6px}
+.stat .pct .n{font:400 26px Georgia,serif}
+.stat .pct .l{font-size:11px; color:var(--dim); letter-spacing:.08em}
+.phases{display:flex; gap:5px; margin:14px 0 6px}
+.phases span{flex:1; height:4px; background:var(--line); border-radius:2px; position:relative; overflow:hidden}
+.phases span i{position:absolute; inset:0; width:0; background:var(--coral); border-radius:2px; transition:width .5s ease}
+.legend{display:flex; justify-content:space-between; font-size:10.5px; color:var(--dim); letter-spacing:.05em; margin-bottom:26px}
+.legend span{display:flex; align-items:center; gap:5px}
+.legend span::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--coral); flex:none}
+.legend span:nth-child(even)::before{background:var(--blue)}
+.legend em{font-style:normal; color:var(--coral)}
+.rule{height:1px; background:var(--line)}
+/* ---------- week ---------- */
+.week{margin-top:0}
+.week-head{
+  display:flex; align-items:center; gap:12px; padding:20px 0 14px; cursor:pointer; user-select:none;
+}
+.week-head .wk{
+  font:italic 400 15px Georgia,serif; color:var(--paper); background:var(--ink);
+  min-width:44px; height:44px; border-radius:22px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; line-height:1; letter-spacing:.02em; flex:none;
+  transition:background .3s;
+}
+.week-head .wk small{font-size:9px; font-family:-apple-system,"PingFang SC",sans-serif; font-style:normal; opacity:.7; letter-spacing:.1em; margin-top:2px}
+.week.done .week-head .wk{background:var(--coral)}
+.week-head .wt{flex:1; min-width:0}
+.week-head .wt .t{font-size:16.5px; font-weight:700; letter-spacing:.01em}
+.week-head .wt .d{font-size:11.5px; color:var(--dim); margin-top:2px; font-style:italic; font-family:Georgia,serif; letter-spacing:.05em}
+.dots{display:flex; gap:5px; flex:none}
+.dots i{width:7px; height:7px; border-radius:50%; background:transparent; border:1.2px solid var(--line); transition:all .3s}
+.dots i.on{background:var(--coral); border-color:var(--coral)}
+.dots i.rest{border-style:dashed; opacity:.55}
+.chev{font-size:11px; color:var(--dim); transition:transform .25s; flex:none}
+.week.open .chev{transform:rotate(90deg)}
+.week-body{display:none; padding-bottom:8px}
+.week.open .week-body{display:block}
+/* ---------- lesson ---------- */
+.lesson{border-top:1px solid var(--line)}
+.lesson-row{display:flex; align-items:center; gap:13px; padding:15px 0; cursor:pointer}
+.circle{
+  width:26px; height:26px; border-radius:50%; border:1.6px solid var(--ink); flex:none;
+  display:flex; align-items:center; justify-content:center; transition:all .25s; background:transparent;
+}
+.circle svg{width:13px; height:13px; stroke:var(--paper); stroke-width:3; fill:none; stroke-linecap:round; stroke-linejoin:round; opacity:0; transform:scale(.5); transition:all .25s}
+.lesson.on .circle{background:var(--coral); border-color:var(--coral)}
+.lesson.on .circle svg{opacity:1; transform:scale(1)}
+.l-main{flex:1; min-width:0}
+.l-day{font-size:10.5px; letter-spacing:.14em; color:var(--dim); margin-bottom:3px}
+.l-name{font-size:15.5px; font-weight:600; transition:color .25s; display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+.lesson.on .l-name{color:var(--coral)}
+.tag{
+  font-size:9.5px; color:var(--blue); border:1px solid var(--blue-line); background:var(--blue-soft);
+  padding:2px 7px; border-radius:9px; letter-spacing:.06em; font-weight:500; white-space:nowrap;
+}
+.l-dur{font:italic 400 13px Georgia,serif; color:var(--dim); flex:none}
+.l-detail{max-height:0; overflow:hidden; transition:max-height .35s ease}
+.lesson.open-d .l-detail{max-height:200px}
+.l-detail-in{padding:0 0 16px 39px}
+.l-detail-in p{font-size:13px; color:#55524C; line-height:1.75; margin-bottom:6px}
+.l-detail-in .src{font-size:11.5px; color:var(--dim); letter-spacing:.03em}
+.l-detail-in .src b{color:var(--ink); font-weight:600}
+.l-detail-in .extra{font-size:12px; color:var(--blue); margin-top:5px}
+/* ---------- rest day ---------- */
+.rest-row{display:flex; align-items:center; gap:13px; padding:13px 0; border-top:1px solid var(--line)}
+.rest-dot{width:26px; height:26px; border-radius:50%; border:1.2px dashed var(--blue); opacity:.55; flex:none}
+.rest-row .t{font-size:13px; color:var(--dim)}
+.rest-row .t b{color:var(--blue); font-weight:600}
+.rest-row .z{margin-left:auto; font:italic 400 14px Georgia,serif; color:var(--dim)}
+/* ---------- footer ---------- */
+footer{margin-top:34px}
+.note{font-size:11.5px; color:var(--dim); line-height:1.8; padding:18px 0 0; border-top:1px solid var(--line)}
+.note b{color:#55524C}
+.reset-wrap{display:flex; justify-content:space-between; align-items:center; margin-top:22px}
+.reset-wrap .brand{font:italic 400 12px Georgia,serif; color:var(--dim); letter-spacing:.1em}
+.btn-reset{
+  font-size:11.5px; letter-spacing:.06em; color:var(--paper); background:var(--ink); border:none;
+  padding:9px 18px; border-radius:20px; cursor:pointer; font-family:inherit;
+}
+.btn-reset:active{transform:scale(.96)}
+/* ---------- confetti ---------- */
+.cf{position:fixed; z-index:99; pointer-events:none; width:7px; height:7px; border-radius:2px}
+@keyframes cfFly{
+  0%{transform:translate(0,0) rotate(0); opacity:1}
+  100%{transform:translate(var(--tx),var(--ty)) rotate(var(--rot)); opacity:0}
+}
+/* toast */
+#toast{
+  position:fixed; left:50%; bottom:44px; transform:translateX(-50%) translateY(20px); opacity:0;
+  background:var(--ink); color:var(--paper); font-size:13px; padding:11px 22px; border-radius:24px;
+  transition:all .3s; pointer-events:none; white-space:nowrap; z-index:98; letter-spacing:.03em;
+}
+#toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">Reset <span style="color:var(--blue)">&middot;</span> Training Plan</div>
+  <h1><span class="num">56</span> 天重置计划</h1>
+  <p class="sub">原 <b>100 天</b>训练计划科学重排 —— 功能课转为每日附加，重复课精选合并，补上每周完整休息日。<b>8 周 × 6 练 1 休</b>，强度阶梯原样保留。</p>
+</header>
+
+<div class="stat">
+  <div class="big"><span class="done" id="stDone">0</span><span class="of"> / 48</span></div>
+  <div class="pct"><div class="n" id="stPct">0%</div><div class="l">COMPLETED</div></div>
+</div>
+<div class="phases" id="phases"></div>
+<div class="legend"><span>① 基础唤醒</span><span>② 功能强化</span><span>③ 力量分化</span><span>④ 冲刺毕业</span></div>
+
+<main id="app"></main>
+
+<footer>
+  <p class="note"><b>训练提示</b>　同一肌群已保持 48 小时恢复间隔；每周日为完整休息日，也可选做 15 分钟纠正与恢复（原 Day5）。「+附加」为 10 分钟低强度功能课，跟练原对应课程即可。<br><b>健康声明</b>　本页为训练安排工具，非医疗建议。关节疼痛、孕期或身体不适请先咨询医生；训练中持续疼痛请立即停止并就医。</p>
+  <div class="reset-wrap">
+    <span class="brand">Reset 56 &middot; based on Day 1&ndash;100</span>
+    <button class="btn-reset" id="btnReset">重置进度</button>
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+/* ================= 数据：8 周 × 6 练（48 节） ================= */
+const PLAN = [
+ {w:1, phase:0, title:"基础唤醒", en:"Foundation I", days:[
+  {d:"周一", n:"臀腿唤醒", min:25, src:"Day2 自重臀腿训练", extra:"足弓功能建立 · Day11",
+   s:"深蹲、臀桥、弓步打底——臀部发力感优先于动作次数。"},
+  {d:"周二", n:"核心启动", min:25, src:"Day1 腹肌与核心训练",
+   s:"卷腹、死虫、平板支撑；腰部贴地，用呼吸带动腹压。"},
+  {d:"周三", n:"上肢唤醒", min:25, src:"Day3 自重上半身训练",
+   s:"俯卧撑与划船变式，肩胛先启动、再带动手臂。"},
+  {d:"周四", n:"臀部专项", min:25, src:"Day4 自重臀部训练", extra:"髋关节功能建立 · Day18",
+   s:"单腿臀桥、蚌式开合——找到臀中肌的灼烧感。"},
+  {d:"周五", n:"全身循环", min:25, src:"Day7 自重全身训练",
+   s:"上下肢串联循环，把心率拉起来、但保留三分余力。"},
+  {d:"周六", n:"核心进阶", min:25, src:"Day6 腹肌与核心训练",
+   s:"在 Day1 动作上加控制时间，慢速比次数更有效。"},
+ ]},
+ {w:2, phase:0, title:"基础巩固", en:"Foundation II", days:[
+  {d:"周一", n:"臀腿进阶", min:25, src:"Day9 臀腿训练", extra:"足弓功能建立 · Day14",
+   s:"弓步幅度加深，加入不对称发力（左右分侧）。"},
+  {d:"周二", n:"肩背强化", min:25, src:"Day17 肩背训练",
+   s:"YTW 与俯身划船，感受肩胛后缩而不是耸肩。"},
+  {d:"周三", n:"核心稳定", min:25, src:"Day8 腹肌与核心训练",
+   s:"抗伸展类动作为主——稳定的核心是所有训练的地基。"},
+  {d:"周四", n:"臀部专项", min:25, src:"Day12 臀部训练", extra:"髋关节功能建立 · Day21",
+   s:"臀推与外展组合，全程保持骨盆中立位。"},
+  {d:"周五", n:"上肢推拉", min:25, src:"Day10 上半身训练",
+   s:"推类与拉类同日配对，总量控制在略有挑战的程度。"},
+  {d:"周六", n:"核心燃脂", min:25, src:"Day13 腹肌与核心训练",
+   s:"核心动作小串联，组间休息压缩到 20 秒内。"},
+ ]},
+ {w:3, phase:1, title:"功能强化", en:"Function I", days:[
+  {d:"周一", n:"臀腿塑形", min:25, src:"Day16 臀腿训练", extra:"足弓功能建立 · Day25",
+   s:"进入第二阶段：同等动作、更慢的离心阶段。"},
+  {d:"周二", n:"上半身综合", min:25, src:"Day24 上半身训练",
+   s:"胸、肩、背一次覆盖，动作质量优先于重量感。"},
+  {d:"周三", n:"脊柱灵活 + 核心", min:30, src:"Day39 脊柱灵活性 + Day15 腹肌与核心",
+   s:"先做灵活性唤醒脊柱，再进入核心训练——这套顺序以后也通用。"},
+  {d:"周四", n:"臀部专项", min:25, src:"Day19 臀部训练", extra:"髋关节功能建立 · Day28",
+   s:"髋部灵活性直接决定臀部发力上限，附加课别跳过。"},
+  {d:"周五", n:"上肢 · 胸肩背", min:25, src:"Day31 上半身训练",
+   s:"原计划的中段主力课，尝试比前两周多做 2 次每set。"},
+  {d:"周六", n:"核心耐力", min:25, src:"Day20 腹肌与核心训练",
+   s:"从「完成动作」转向「全程保持张力」。"},
+ ]},
+ {w:4, phase:1, title:"功能强化", en:"Function II", days:[
+  {d:"周一", n:"臀腿爆发", min:25, src:"Day23 臀腿训练", extra:"足弓功能建立 · Day67",
+   s:"加入节奏变化：起快落慢，刺激新的适应。"},
+  {d:"周二", n:"上肢 · 背手臂", min:25, src:"Day38 上半身训练（胸、肩、背）",
+   s:"背是体态的钥匙——每次划船都想着肩胛骨夹硬币。"},
+  {d:"周三", n:"核心进阶", min:25, src:"Day22 腹肌与核心训练",
+   s:"第二阶段过半，核心课应已明显比第一周轻松。"},
+  {d:"周四", n:"臀部专项", min:25, src:"Day26 臀部训练", extra:"髋关节功能恢复 · Day32",
+   s:"本周髋附加换成「恢复」版本，强度低但别省。"},
+  {d:"周五", n:"肩 & 手臂", min:25, src:"Day41 肩膀及手臂训练",
+   s:"肩三束都要照顾到，手臂收尾小重量多次数。"},
+  {d:"周六", n:"脊柱灵活", min:20, src:"Day42 脊柱灵活性",
+   s:"独立灵活日——练完这周你会需要它。"},
+ ]},
+ {w:5, phase:1, title:"功能强化", en:"Function III", days:[
+  {d:"周一", n:"臀腿强化", min:25, src:"Day30 臀腿训练",
+   s:"第二阶段最后一个完整臀腿周，做到当前最好质量。"},
+  {d:"周二", n:"肩 & 肱三头", min:25, src:"Day45 肩膀及肱三头肌训练",
+   s:"三头占总臂围三分之二——别只练正面。"},
+  {d:"周三", n:"核心 + 足弓", min:30, src:"Day27 腹肌与核心", extra:"足弓功能建立 · Day70",
+   s:"足弓是体态链条的起点，站姿动作里感受三点落地。"},
+  {d:"周四", n:"臀部专项", min:25, src:"Day33 臀部训练", extra:"髋关节功能恢复 · Day35",
+   s:"臀部主打周：附加髋恢复，为下周力量分化蓄力。"},
+  {d:"周五", n:"胸 & 背 & 手臂", min:25, src:"Day48 胸&背部&手臂训练",
+   s:"第二阶段上肢收官——三大肌群一次串完。"},
+  {d:"周六", n:"脊柱灵活 + 全身复习", min:30, src:"Day46 脊柱灵活性 + Day7 全身（复习）",
+   s:"用 Day7 的动作做轻量循环复习，检验八周来的进步。"},
+ ]},
+ {w:6, phase:2, title:"力量分化", en:"Strength I", days:[
+  {d:"周一", n:"臀腿 · 力量", min:25, src:"Day37 臀腿训练",
+   s:"进入力量分化期：负荷感提升，组间休息放宽到 60–90 秒。"},
+  {d:"周二", n:"胸 & 背", min:25, src:"Day52 胸&背部训练",
+   s:"经典拮抗肌配对，一个推一个拉，效率翻倍。"},
+  {d:"周三", n:"核心 & 手臂", min:25, src:"Day50 核心与手臂训练",
+   s:"核心当「大肌群」练，手臂当「细节」收尾。"},
+  {d:"周四", n:"臀部专项", min:25, src:"Day40 臀部训练", extra:"髋关节功能建立 · Day77",
+   s:"力量期的臀部课——负重感（矿泉水瓶/背包）可以上场了。"},
+  {d:"周五", n:"肩 & 背 & 手臂", min:25, src:"Day55 肩膀&背部&手臂训练",
+   s:"上肢大综合日，注意动作节奏不要被疲劳带快。"},
+  {d:"周六", n:"核心收官", min:25, src:"Day29 腹肌与核心训练",
+   s:"同一套课，和第一周比一比能多做多少。"},
+ ]},
+ {w:7, phase:2, title:"力量分化", en:"Strength II", days:[
+  {d:"周一", n:"臀腿 · 强化", min:25, src:"Day44 臀腿训练", extra:"足弓功能建立 · Day81",
+   s:"最后一周力量臀腿——下周就进入冲刺了。"},
+  {d:"周二", n:"胸大肌 & 肱三头", min:25, src:"Day66 胸大肌&肱三头肌训练",
+   s:"胸和三头在推类动作里天然搭档，顺序练就对了。"},
+  {d:"周三", n:"核心 & 手臂", min:25, src:"Day57 核心&手臂训练",
+   s:"力量期第二次核心手臂组合，保持张力不松。"},
+  {d:"周四", n:"臀肌 & 腘绳肌", min:25, src:"Day82 臀肌&腘绳肌训练", extra:"髋关节功能建立 · Day88",
+   s:"后侧链专属日——大多数人最弱、也最值得练的地方。"},
+  {d:"周五", n:"背 & 肱二头", min:25, src:"Day69 背&肱二头肌训练",
+   s:"拉类双拼：背部做宽度，二头做峰值收缩。"},
+  {d:"周六", n:"肩 & 手臂", min:25, src:"Day71 肩膀&手臂训练",
+   s:"力量期收官日，肩臂细节周——下周冲刺见。"},
+ ]},
+ {w:8, phase:3, title:"冲刺毕业", en:"Sprint Week", days:[
+  {d:"周一", n:"上半身冲刺", min:25, src:"Day92 上半身冲刺训练",
+   s:"冲刺模式：休息更短、节奏更快，把心率顶上去。"},
+  {d:"周二", n:"下半身冲刺", min:25, src:"Day93 下半身冲刺训练",
+   s:"臀腿高频冲击——记得今天之前睡眠要跟上。"},
+  {d:"周三", n:"全身冲刺", min:25, src:"Day94 全身冲刺训练",
+   s:"上下肢同日串联，八周训练的总汇演。"},
+  {d:"周四", n:"上半身冲刺 II", min:25, src:"Day95 上半身冲刺训练",
+   s:"第二次上冲刺，目标是动作次数超过周一。"},
+  {d:"周五", n:"下半身冲刺 II", min:25, src:"Day96 下半身冲刺训练",
+   s:"最后一场臀腿大课——好好告别。"},
+  {d:"周六", n:"毕业 · 全身冲刺", min:30, src:"Day97–100 全身冲刺（合并）",
+   s:"原计划最后四天的精华合并成一节毕业课。练完它，56 天重置完成。🎉"},
+ ]},
+];
+const RESTS = {1:"可选 · 纠正与恢复（原 Day5）",2:"可选 · 纠正与恢复（原 Day56）",3:"可选 · 全身伸展（原 Day53）",4:"可选 · 纠正与恢复（原 Day60）",5:"可选 · 纠正与恢复（原 Day63）",6:"可选 · 纠正与恢复（原 Day74）",7:"可选 · 纠正与恢复（原 Day84）",8:"毕业休息 · 你完成了 🎉"};
+const PHASE_RANGE = [[1,2],[3,5],[6,7],[8,8]]; // 每阶段覆盖的周
+
+/* ================= 状态 ================= */
+const KEY = "reset56_v1";
+let LOG = {};
+try{ LOG = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; }catch(e){ LOG = {}; }
+const idOf = (w,i)=>`w${w}d${i}`;
+const totalDone = ()=> Object.values(LOG).filter(Boolean).length;
+
+/* ================= 渲染 ================= */
+const app = document.getElementById("app");
+function firstUndoneWeek(){
+  for(const blk of PLAN){
+    const done = blk.days.filter((_,i)=>LOG[idOf(blk.w,i)]).length;
+    if(done < 6) return blk.w;
+  }
+  return PLAN[PLAN.length-1].w;
+}
+function render(){
+  app.innerHTML = "";
+  const openW = firstUndoneWeek();
+  PLAN.forEach(blk=>{
+    const wk = document.createElement("section");
+    wk.className = "week" + (blk.w===openW ? " open" : "");
+    const done = blk.days.filter((_,i)=>LOG[idOf(blk.w,i)]).length;
+    if(done===6) wk.classList.add("done");
+    const dots = Array.from({length:7},(_,k)=>
+      k===6 ? `<i class="rest"></i>` : `<i class="${LOG[idOf(blk.w,k)]?"on":""}"></i>`).join("");
+    wk.innerHTML = `
+      <div class="week-head">
+        <div class="wk">W${blk.w}<small>WEEK</small></div>
+        <div class="wt"><div class="t">${blk.title}</div><div class="d">${blk.en} · Week ${blk.w}</div></div>
+        <div class="dots">${dots}</div>
+        <span class="chev">▸</span>
+      </div>
+      <div class="week-body"></div>`;
+    const body = wk.querySelector(".week-body");
+    blk.days.forEach((c,i)=>{
+      const id = idOf(blk.w,i);
+      const on = !!LOG[id];
+      const el = document.createElement("div");
+      el.className = "lesson" + (on?" on":"");
+      el.innerHTML = `
+        <div class="lesson-row">
+          <div class="circle"><svg viewBox="0 0 24 24"><polyline points="4 12.5 10 18.5 20 6"/></svg></div>
+          <div class="l-main">
+            <div class="l-day">${c.d} · WEEK ${blk.w}</div>
+            <div class="l-name">${c.n}${c.extra?`<span class="tag">+附加</span>`:""}</div>
+          </div>
+          <div class="l-dur">${c.min}′</div>
+        </div>
+        <div class="l-detail"><div class="l-detail-in">
+          <p>${c.s}</p>
+          <p class="src">跟练来源　<b>${c.src}</b></p>
+          ${c.extra?`<p class="extra">＋ 今日附加：${c.extra}（约10分钟）</p>`:""}
+        </div></div>`;
+      el.querySelector(".lesson-row").addEventListener("click",e=>{
+        if(!LOG[id]){ el.classList.add("open-d"); }
+        toggle(id, el, blk, i);
+      });
+      body.appendChild(el);
+    });
+    const rest = document.createElement("div");
+    rest.className = "rest-row";
+    rest.innerHTML = `<div class="rest-dot"></div><div class="t"><b>周日 · 休息日</b>　${RESTS[blk.w]}</div><div class="z">rest</div>`;
+    body.appendChild(rest);
+    wk.querySelector(".week-head").addEventListener("click",()=>wk.classList.toggle("open"));
+    app.appendChild(wk);
+  });
+  updateStat();
+}
+function updateStat(){
+  const n = totalDone();
+  document.getElementById("stDone").textContent = n;
+  document.getElementById("stPct").textContent = Math.round(n/48*100) + "%";
+  const ph = document.getElementById("phases");
+  ph.innerHTML = PHASE_RANGE.map(([a,b])=>{
+    const ids=[]; for(let w=a;w<=b;w++){ const blk=PLAN.find(p=>p.w===w); blk.days.forEach((_,i)=>ids.push(idOf(w,i))); }
+    const dn = ids.filter(id=>LOG[id]).length;
+    return `<span><i style="width:${dn/ids.length*100}%"></i></span>`;
+  }).join("");
+}
+
+/* ================= 打卡 ================= */
+function refreshDots(w){
+  const blk = PLAN.find(p=>p.w===w);
+  const sec = app.querySelectorAll(".week")[blk.w-1];
+  sec.querySelectorAll(".dots i").forEach((dot,k)=>{
+    if(k===6) return;
+    dot.classList.toggle("on", !!LOG[idOf(w,k)]);
+  });
+}
+function toggle(id, el, blk, i){
+  LOG[id] = !LOG[id];
+  if(LOG[id]){
+    localStorage.setItem(KEY, JSON.stringify(LOG));
+    el.classList.add("on");
+    const r = el.querySelector(".circle").getBoundingClientRect();
+    burst(r.left+13, r.top+13, 14);
+    const done = blk.days.filter((_,k)=>LOG[idOf(blk.w,k)]).length;
+    if(done===6){
+      setTimeout(()=>{ burst(innerWidth/2, innerHeight*0.35, 44); toast(`WEEK ${blk.w} 完成 · 全点亮`); }, 250);
+      el.closest(".week").classList.add("done");
+    }else{
+      toast(`已打卡 · 本周 ${done}/6`);
+    }
+    refreshDots(blk.w);
+    updateStat();
+  }else{
+    delete LOG[id];
+    localStorage.setItem(KEY, JSON.stringify(LOG));
+    el.classList.remove("on");
+    el.closest(".week").classList.remove("done");
+    refreshDots(blk.w);
+    updateStat();
+  }
+}
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("show"), 1800);
+}
+
+/* ================= 撒花 ================= */
+const CF_COLORS = ["#E8918F","#F2B8B6","#7FA9C4","#B8D4E3","#141414"];
+function burst(x, y, n){
+  for(let k=0;k<n;k++){
+    const p = document.createElement("div");
+    p.className = "cf";
+    const c = CF_COLORS[Math.floor(Math.random()*CF_COLORS.length)];
+    p.style.cssText = `left:${x}px;top:${y}px;background:${c};--tx:${(Math.random()-0.5)*220}px;--ty:${-Math.random()*180-40}px;--rot:${(Math.random()-0.5)*540}deg`;
+    document.body.appendChild(p);
+    p.animate([
+      {transform:"translate(0,0) rotate(0)", opacity:1},
+      {transform:`translate(${p.style.getPropertyValue("--tx")}, ${p.style.getPropertyValue("--ty")}) rotate(${p.style.getPropertyValue("--rot")})`, opacity:0}
+    ], {duration:700+Math.random()*400, easing:"cubic-bezier(.2,.7,.3,1)"}).onfinish = ()=>p.remove();
+  }
+}
+
+/* ================= 重置 ================= */
+document.getElementById("btnReset").addEventListener("click",()=>{
+  if(confirm("清空全部打卡记录？此操作不可恢复。")){
+    LOG = {}; localStorage.removeItem(KEY); render();
+    toast("已重置 · Day 1 重新开始");
+  }
+});
+
+render();
+</script>
+</body>
+</html>
